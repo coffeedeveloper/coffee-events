@@ -13,8 +13,7 @@
     </style>
   </head>
   <body>
-    <div class="haha">
-      <a href="javascript:;" class="nimei" taget="_blank">this is link</a>
+    <div class="list">
       <ul>
         <li><a href="javascript:;">1</a></li>
         <li><a href="javascript:;">2</a></li>
@@ -24,49 +23,33 @@
       </ul>
     </div>
 
-    <div>
-      <a href="javascript:;">this is link</a>
-      <ul>
-        <li><a href="javascript:;">1</a></li>
-        <li><a href="javascript:;">2</a></li>
-        <li><a href="javascript:;">3</a></li>
-        <li><a href="javascript:;">4</a></li>
-        <li><a href="javascript:;">5</a></li>
-      </ul>
+    <div class="wrapper">
+      <div data-e="1">xxoo</div>
+
+      <div class="oo">
+        <a href="javascript:;">oo</a>
+      </div>
     </div>
-
-    <ul>
-      <li><a href="javascript:;">haha</a></li>
-    </ul>
-    <a href="javascript:;">this is another link</a>
-
-    <button type="button">remove event handle</button>
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.1.6/zepto.js"></script>
-    <script type="text/javascript" src="../build/events.js"></script>
+    <script type="text/javascript" src="../lib/events.js"></script>
     <script type="text/javascript">
-      Events.on('div', 'click', 'li > a', function(e) {
-        console.log('1');
-        console.log(e);
-        console.log(this);
+      const wrapper = document.querySelector('.wrapper')
+      Events.on('.list', 'click', 'li > a', function(e) {
+        console.log(e.target);
       });
-
-      var hey = function() {
-        console.log('hey');
-      }
-
-      Events.once('div', 'click', 'li > a', hey);
-
-      Events.on('button', 'click', function(e) {
-        //Events.off('div', 'click');
-        Events.off('div', 'click', hey);
+      Events.on('.wrapper', 'click', function(e) {
+        console.log('wrapper', e.target);
       });
-
-
-
-      // $('div').on('click', '> a', function() {
-      //   console.log('- - - -- ');
-      // })
+      Events.on('.wrapper', 'click', '[data-e]', function(e) {
+        console.log(e.target);
+      });
+      Events.on(wrapper, 'click', '.oo', function(e) {
+        console.log(e.target);
+      });
+      $('.wrapper').on('click', '.oo', function(e) {
+        console.log('zepto', e.target)
+      })
     </script>
   </body>
 </html>

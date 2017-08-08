@@ -86,7 +86,22 @@ const isMatch = (parent, ele, selector) => {
                 || ele.mozMatchesSelector
                 || ele.msMatchesSelector;
 
-  if (match) return match.call(ele, selector);
+  if (match) {
+    if (match.call(ele, selector)) {
+      r = true;
+    } else if (ele === parent) {
+      r = false;
+    } else {
+      let p = ele.parentNode;
+      do {
+        if (match.call(p, selector)) {
+          r = true
+        }
+        p = p.parentNode
+      } while (p !== parent && r === false);
+    }
+    return r
+  }
 
   const items = parent.querySelectorAll(selector);
 
@@ -114,7 +129,13 @@ const on = (ele, type, selector, callback, isOne) => {
     let target = e.target;
 
     if (selector) {
-      if (isMatch(ele, target, selector)) callback.call(target, e);
+      if (ele.length) {
+        each(ele, (item) => {
+          if (isMatch(item, target, selector)) callback.call(target, e);
+        })
+      } else {
+        if (isMatch(ele, target, selector)) callback.call(target, e);
+      }
     } else {
       callback.call(ele, e);
     }
@@ -173,7 +194,7 @@ const support = () => {
 
 support();
 
-export {
+export default {
   on,
   off,
   once,
