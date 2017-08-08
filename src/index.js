@@ -80,42 +80,66 @@ const each = (items, cb) => {
 }
 
 const isMatch = (parent, ele, selector) => {
-  const match = ele.matches
+  const matches = ele.matches
                 || ele.matchesSelector
                 || ele.webkitMatchesSelecotr
                 || ele.mozMatchesSelector
                 || ele.msMatchesSelector;
 
-  if (match) {
-    if (match.call(ele, selector)) {
+  let match = null
+  let r = false;
+  if (matches) {
+    if (matches.call(ele, selector)) {
       r = true;
+      match = ele
     } else if (ele === parent) {
       r = false;
     } else {
       let p = ele.parentNode;
       do {
-        if (match.call(p, selector)) {
+        if (matches.call(p, selector)) {
           r = true
+          match = p
         }
         p = p.parentNode
       } while (p !== parent && r === false);
     }
-    return r
+    return {
+      r,
+      match,
+    }
   }
 
   const items = parent.querySelectorAll(selector);
 
-  let r = false;
-
   each(items, (item, index) => {
-    if (item == ele) {
+    if (item === ele) {
       r = true;
+      match = item
       return false;
     }
   });
 
-  return r;
+  return {
+    r,
+    match,
+  };
 };
+
+const createEventTarget = (e, ext) => {
+  const event = {}
+  event.originalEvent = e
+
+  for (let p in e) {
+    event[p] = e[p]
+  }
+
+  for (let p in ext) {
+    event[p] = ext[p]
+  }
+
+  return event
+}
 
 const on = (ele, type, selector, callback, isOne) => {
   if (typeof ele === 'string') ele = document.querySelectorAll(ele);
@@ -131,10 +155,35 @@ const on = (ele, type, selector, callback, isOne) => {
     if (selector) {
       if (ele.length) {
         each(ele, (item) => {
-          if (isMatch(item, target, selector)) callback.call(target, e);
+          const {
+            r,
+            match,
+          } = isMatch(item, target, selector)
+          if (r) {
+            let event = e
+            if (target !== match) {
+              event = createEventTarget(e, {
+                currentTarget: match,
+                liveFired: ele,
+              })
+            }
+            callback.call(target, event);
+          }
         })
       } else {
-        if (isMatch(ele, target, selector)) callback.call(target, e);
+        const {
+          r,
+          match,
+        } = isMatch(ele, target, selector)
+        if (r) {
+          if (target !== match) {
+            event = createEventTarget(e, {
+              currentTarget: match,
+              liveFired: ele,
+            })
+          }
+          callback.call(target, event);
+        }
       }
     } else {
       callback.call(ele, e);
